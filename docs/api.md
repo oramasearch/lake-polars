@@ -3,15 +3,15 @@
 `lake-polars` — **lake-polars, powered by Polars** — is the small web service behind lake's
 **`polars` service kind**: analytics compute over uploaded datasets, not a database. There is no
 upstream Kubernetes operator we would use (the commercial Polars On-Prem product and its operator
-are not used: the liquid-bridge `/lake-service` skill excludes it on its terms), so the Orama operator runs it itself, one StatefulSet
-per service (orama-operator `docs/lake/services.md`; liquid-bridge decision 47, amended; lake#195).
+are not used, because of their terms), so the Orama operator runs it itself, one StatefulSet
+per service (orama-operator `docs/lake/services.md`).
 The contract is the `polars` row of lake's `docs/control-plane/services.md` and the paragraph after
 its table; this page is the whole API as built.
 
 | | |
 |---|---|
 | Source | this repository: [`src/main.rs`](../src/main.rs) (configuration, startup, shutdown), [`src/server.rs`](../src/server.rs) (the HTTP API), [`src/datasets.rs`](../src/datasets.rs) (the store), [`src/sandbox.rs`](../src/sandbox.rs) (the SQL sandbox), [`src/values.rs`](../src/values.rs) (JSON values) |
-| Image | `oramasearch/lake-polars:<tag>` (a **private** Docker Hub repository), built from [`Dockerfile`](../Dockerfile) for `linux/amd64` |
+| Image | `oramasearch/lake-polars:<tag>` (Docker Hub), built from [`Dockerfile`](../Dockerfile) for `linux/amd64` |
 | Engine | the open-source [`polars`](https://github.com/pola-rs/polars) crate 0.55.2, **MIT**, with its SQL front end (`polars-sql`) |
 | HTTP | `axum` 0.8.9 on `tokio` 1.53.1, both **MIT** |
 | Runtime | `gcr.io/distroless/cc-debian12:nonroot` (glibc, no shell), user `65532:65532`, one binary |
@@ -209,11 +209,10 @@ docker buildx build --platform linux/amd64 -t oramasearch/lake-polars:<tag> .
 # or: make docker-build IMG=oramasearch/lake-polars:<tag>
 ```
 
-Build on native amd64 (the cluster BuildKit), never under emulation. The builder is
+Build on native amd64 (for example a BuildKit on amd64), never under emulation. The builder is
 `rust:1.95-bookworm` and the runtime `gcr.io/distroless/cc-debian12:nonroot`, both digest-pinned,
 both Debian 12 glibc. The chart's default is `lakeServices.polarsImage:
-oramasearch/lake-polars:0.1.0`, so that tag must be published (**private** Docker Hub: create the
-repository private before the first push) before a Polars service can start; a Lake overrides it
+oramasearch/lake-polars:0.1.0`, so that tag must be published before a Polars service can start; a Lake overrides it
 with `spec.services.polarsImage`.
 
 ## Run locally
