@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! lake-polars, powered by Polars: Parquet datasets and Polars SQL over HTTP for lake's `polars`
 //! service kind. The Orama operator runs it as a StatefulSet per service (orama-operator

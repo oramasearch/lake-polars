@@ -31,3 +31,9 @@ The whole API, configuration, limits, sandbox and errors: [`docs/api.md`](docs/a
 **Private.** This repository and the `oramasearch/lake-polars` Docker Hub repository are private,
 like every Orama service (the umbrella `CLAUDE.md` rule). The operator side (StatefulSet, Service,
 credential) is orama-operator `internal/controller/lake_service_polars.go`.
+
+## License
+
+MIT, see [LICENSE](LICENSE). Third-party components and their licenses are in
+[THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES). Contributions are welcome under the Developer
+Certificate of Origin; see [CONTRIBUTING.md](CONTRIBUTING.md).

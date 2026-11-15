@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! The dataset store: one Parquet file per dataset, `<dir>/<name>.parquet`. Every function here is
 //! blocking (disk and Polars work); the server runs them on the blocking pool.

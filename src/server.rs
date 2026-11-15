@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! The HTTP API: datasets, queries and health, behind a bearer token. `docs/api.md` is the
 //! reference; this file is the implementation.
