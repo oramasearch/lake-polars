@@ -4,7 +4,7 @@
 analytics compute, not a database. A customer uploads datasets (CSV, JSONL or Parquet, stored as
 Parquet) and runs Polars SQL over them through a small HTTP API with a bearer token. The Orama
 operator runs a StatefulSet of `lake-polars` workers per service, each with its own volume, and lake
-hands the customer the address and token (lake#195; liquid-bridge decision 47, amended).
+hands the customer the address and token.
 
 It is built on the open-source [`polars`](https://github.com/pola-rs/polars) Rust crate (MIT). The
 commercial Polars On-Prem product and its Kubernetes operator are **not** used.
@@ -28,6 +28,5 @@ curl -s -H 'Authorization: Bearer local-dev-token' \
 
 The whole API, configuration, limits, sandbox and errors: [`docs/api.md`](docs/api.md).
 
-**Private.** This repository and the `oramasearch/lake-polars` Docker Hub repository are private,
-like every Orama service (the umbrella `CLAUDE.md` rule). The operator side (StatefulSet, Service,
+The image is `oramasearch/lake-polars` on Docker Hub. The operator side (StatefulSet, Service,
 credential) is orama-operator `internal/controller/lake_service_polars.go`.
