@@ -2,17 +2,17 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "lake-polars-0fc68f0e4d3d",
-  "documentNamespace": "https://github.com/oramasearch/lake-polars/sbom/0fc68f0e4d3da50af04860d2825d20c949ca7d97",
+  "name": "lake-polars-e4348a76f0d3",
+  "documentNamespace": "https://github.com/oramasearch/lake-polars/sbom/e4348a76f0d3f2e01da029ec5acd031525f09b62",
   "creationInfo": {
-    "created": "2026-11-15T17:24:30Z",
+    "created": "2026-11-16T01:55:18Z",
     "creators": [
       "Organization: OramaSearch, Inc.",
       "Tool: tools/sbom.py",
       "Tool: syft"
     ],
     "licenseListVersion": "3.29",
-    "comment": "Made from source commit 0fc68f0e4d3da50af04860d2825d20c949ca7d97 by tools/sbom.py."
+    "comment": "Made from source commit e4348a76f0d3f2e01da029ec5acd031525f09b62 by tools/sbom.py."
   },
   "documentDescribes": [
     "SPDXRef-DocumentRoot"
@@ -6302,7 +6302,7 @@
     {
       "name": "lake-polars",
       "SPDXID": "SPDXRef-DocumentRoot",
-      "versionInfo": "0fc68f0e4d3d",
+      "versionInfo": "e4348a76f0d3",
       "downloadLocation": "git+https://github.com/oramasearch/lake-polars.git",
       "homepage": "https://github.com/oramasearch/lake-polars",
       "filesAnalyzed": false,
