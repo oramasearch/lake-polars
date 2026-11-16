@@ -1,12 +1,8 @@
 # CLAUDE.md — lake-polars
 
-Org-wide conventions are in [`oramasearch/orama-bridge`](https://github.com/oramasearch/orama-bridge)
-`CLAUDE.md` and apply in full: no AI attribution, merge commits never squash, commit means push,
-private by default, documentation in the same change.
-
 - **What it is:** one Rust binary (`src/main.rs`) serving Parquet datasets and Polars SQL over HTTP
   (`src/server.rs`; the store is `src/datasets.rs`, the SQL sandbox `src/sandbox.rs`, JSON values
-  `src/values.rs`). The API contract is lake `docs/control-plane/services.md` (the `polars` row and
+  `src/values.rs`). The API contract is lake's `docs/control-plane/services.md` (the `polars` row and
   the paragraph after the table); what is built is [`docs/api.md`](docs/api.md). Change both
   together.
 - **Branding:** "lake-polars, powered by Polars". Never "Polars Cloud" or anything implying the
@@ -34,9 +30,19 @@ private by default, documentation in the same change.
 - **Never log** SQL, bodies, dataset contents, the query string, headers or the token.
 - **Build and verify:** `cargo build --locked && cargo clippy --locked --all-targets -- -D warnings
   && cargo test --locked` (`make lint test`). Debug builds are enough for tests.
-- **Release:** build `linux/amd64` on the cluster BuildKit (liquid-bridge `.claude/skills/liquid-dev`)
-  — never under emulation — create the Docker Hub repository **private** before the first push,
-  push `oramasearch/lake-polars:<semver>` (an immutable tag), confirm an anonymous
-  `https://hub.docker.com/v2/repositories/oramasearch/lake-polars/` still answers 404, then bump the
-  operator's default image (`chart/values.yaml` `lakeServices.polarsImage`, `cmd/main.go`
-  `--lake-polars-image`).
+- **Images** are built for `linux/amd64` natively, never under emulation, and tagged with an
+  immutable semantic version. A new image version is adopted by bumping the operator's default
+  (`chart/values.yaml` `lakeServices.polarsImage`, `cmd/main.go` `--lake-polars-image`).
+
+## Rules
+
+- **Branches:** branch from `dev`, and open every pull request against `dev`. `main` holds the last
+  release. Pull requests are merged with merge commits, never squashed.
+- **Documentation in the same change:** `README.md` and the pages under `docs/` change in the same
+  commit as the code they describe.
+- **No AI attribution** in commits, pull requests, tags or release notes: no `Co-Authored-By`
+  trailers for an assistant, no "Generated with" lines.
+- **Never write the word "seam"**; name the mechanism (interface, extension point, injected
+  dependency, boundary).
+- **No time or size estimates**; report what was done.
+- Report vulnerabilities privately, as `SECURITY.md` describes, never in a public issue.
