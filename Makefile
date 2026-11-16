@@ -1,4 +1,6 @@
-IMG ?= oramasearch/lake-polars:dev
+# SPDX-License-Identifier: MIT
+
+IMG ?= lake-polars:dev
 
 .PHONY: build test lint fmt docker-build run
 

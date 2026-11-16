@@ -20,6 +20,7 @@
   | `serde`, `serde_json` | 1.0.228, 1.0.151 | MIT OR Apache-2.0 | JSON |
   | `sha2` | 0.10.9 | MIT OR Apache-2.0 | token hashing |
   | `subtle` | 2.6.1 | BSD-3-Clause | constant-time compare |
+  | `mimalloc` | 0.1.52 | MIT | the allocator (musl's own is slow under Polars' threads) |
 
 - **The sandbox is load-bearing.** Polars SQL's table functions (`read_csv`, `read_parquet`,
   `read_json`, `read_ipc`) read any path the process can read. `src/sandbox.rs` allows exactly one
@@ -27,12 +28,22 @@
   `UNNEST`. On a Polars upgrade, re-read `polars-sql`'s `context.rs` (`execute_statement`,
   `get_table`) and `table_functions.rs` for new ways to reach files, and keep the tests in
   `tests/api.rs` (`file_reading_table_functions_are_refused`) green.
+- **Security model:** [`docs/security.md`](docs/security.md) lists every attack the service
+  defends against and where. A change that adds an entry point, a SQL function that allocates from
+  a literal, or a new way to hold a connection updates that table and adds a test.
 - **Never log** SQL, bodies, dataset contents, the query string, headers or the token.
 - **Build and verify:** `cargo build --locked && cargo clippy --locked --all-targets -- -D warnings
   && cargo test --locked` (`make lint test`). Debug builds are enough for tests.
 - **Images** are built for `linux/amd64` natively, never under emulation, and tagged with an
   immutable semantic version. A new image version is adopted by bumping the operator's default
   (`chart/values.yaml` `lakeServices.polarsImage`, `cmd/main.go` `--lake-polars-image`).
+- **The image carries no GPL or LGPL code.** It is one statically linked musl binary on `scratch`
+  (`Dockerfile`); the build fails if the binary has a dynamic dependency. Never move it to a base
+  with a libc or a shell.
+- **Licences are generated.** After any change to `Cargo.toml` or `Cargo.lock`, run
+  `cargo fetch --locked && python3 tools/third-party-licenses.py` (it refuses a crate whose licence
+  is not permissive) and `python3 tools/sbom.py`, and commit the results; `--check` on either
+  verifies.
 
 ## Rules
 

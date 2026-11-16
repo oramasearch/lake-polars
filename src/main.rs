@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! lake-polars, powered by Polars: Parquet datasets and Polars SQL over HTTP for lake's `polars`
 //! service kind. The Orama operator runs it as a StatefulSet per service (orama-operator
@@ -13,6 +12,7 @@
 //! LAKE_POLARS_ADDR                  the listen address (default 0.0.0.0:8080)
 //! LAKE_POLARS_MAX_BODY_BYTES        the largest upload (default 268435456, 256 MiB)
 //! LAKE_POLARS_QUERY_TIMEOUT_SECONDS the query time limit (default 30)
+//! LAKE_POLARS_UPLOAD_TIMEOUT_SECONDS how long an upload body may take to arrive (default 300)
 //! LAKE_POLARS_MAX_CONCURRENT        queries and uploads running at once (default 2)
 //! LAKE_POLARS_MEMORY_LIMIT          the container memory limit in bytes (optional)
 //! LAKE_POLARS_THREADS               Polars' thread pool size (optional; POLARS_MAX_THREADS)
@@ -24,8 +24,11 @@ use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Duration;
 
-use lake_polars::{datasets, router, server, Config, State};
+use lake_polars::{datasets, server, Config, State};
 use serde_json::json;
+
+#[global_allocator]
+static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 fn log(level: &str, msg: &str, extra: serde_json::Value) {
     let mut line = json!({"level": level, "msg": msg});
@@ -62,13 +65,21 @@ fn config() -> Result<(Config, SocketAddr), String> {
         "LAKE_POLARS_QUERY_TIMEOUT_SECONDS",
         server::DEFAULT_QUERY_TIMEOUT.as_secs(),
     )?);
+    config.upload_timeout = Duration::from_secs(env_number(
+        "LAKE_POLARS_UPLOAD_TIMEOUT_SECONDS",
+        server::DEFAULT_UPLOAD_TIMEOUT.as_secs(),
+    )?);
     config.max_concurrent =
         env_number("LAKE_POLARS_MAX_CONCURRENT", server::DEFAULT_MAX_CONCURRENT)?;
     config.memory_limit = match env("LAKE_POLARS_MEMORY_LIMIT") {
         None => None,
         Some(_) => Some(env_number::<u64>("LAKE_POLARS_MEMORY_LIMIT", 0)?).filter(|n| *n > 0),
     };
-    if config.max_body_bytes == 0 || config.query_timeout.is_zero() || config.max_concurrent == 0 {
+    if config.max_body_bytes == 0
+        || config.query_timeout.is_zero()
+        || config.upload_timeout.is_zero()
+        || config.max_concurrent == 0
+    {
         return Err("limits must be greater than zero".into());
     }
     config.log = Arc::new(|line| println!("{line}"));
@@ -76,6 +87,14 @@ fn config() -> Result<(Config, SocketAddr), String> {
 }
 
 fn main() -> ExitCode {
+    // A panic's message can carry data (a value Polars choked on): log only where it happened.
+    std::panic::set_hook(Box::new(|info| {
+        let location = info
+            .location()
+            .map(|l| format!("{}:{}", l.file(), l.line()))
+            .unwrap_or_default();
+        log("ERROR", "panic", json!({"location": location}));
+    }));
     // Polars sizes its thread pool from POLARS_MAX_THREADS the first time it is used, so this must
     // happen before any Polars call and before other threads exist.
     if let Some(threads) = env("LAKE_POLARS_THREADS") {
@@ -125,9 +144,11 @@ fn main() -> ExitCode {
 
 async fn serve(config: Config, addr: SocketAddr) -> Result<(), String> {
     let dir = config.dir.clone();
+    // Sweep first: temp files a crash left behind may be what filled the volume.
+    let swept = datasets::sweep_temp_files(&dir)
+        .map_err(|e| format!("the data directory {} is not usable: {e}", dir.display()))?;
     server::probe(&dir)
         .map_err(|e| format!("the data directory {} is not usable: {e}", dir.display()))?;
-    let swept = datasets::sweep_temp_files(&dir).map_err(|e| e.to_string())?;
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .map_err(|e| format!("listen on {addr}: {e}"))?;
@@ -137,8 +158,7 @@ async fn serve(config: Config, addr: SocketAddr) -> Result<(), String> {
         json!({"addr": addr.to_string(), "dir": dir.display().to_string(), "swept_temp_files": swept,
                "upload_cap": config.upload_cap(), "max_concurrent": config.max_concurrent}),
     );
-    axum::serve(listener, router(State::new(config)))
-        .with_graceful_shutdown(shutdown_signal())
+    server::serve(listener, State::new(config), shutdown_signal())
         .await
         .map_err(|e| e.to_string())?;
     log("INFO", "lake-polars stopped serving", json!({}));

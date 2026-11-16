@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! How a Polars value becomes JSON in a query answer.
 //!
