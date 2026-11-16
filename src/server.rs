@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use subtle::ConstantTimeEq;
-use tokio::sync::Semaphore;
+use tokio::sync::{OwnedSemaphorePermit, Semaphore};
 
 use crate::datasets::{self, Format, StoreError};
 use crate::sandbox::{self, Refusal};
@@ -37,6 +37,8 @@ pub const QUERY_BODY_BYTES: usize = 1 << 20;
 pub const DEFAULT_QUERY_TIMEOUT: Duration = Duration::from_secs(30);
 /// How many queries and uploads run at once; the rest wait their turn (inside their timeout).
 pub const DEFAULT_MAX_CONCURRENT: usize = 2;
+/// How long an upload may take to arrive once it holds its permit, before `408 timeout`.
+pub const DEFAULT_UPLOAD_TIMEOUT: Duration = Duration::from_secs(300);
 /// Under a memory limit, an upload may be at most this fraction of it: a parsed frame and the
 /// Parquet writer's buffers take several times the raw bytes.
 pub const UPLOAD_MEMORY_DIVISOR: u64 = 4;
@@ -54,6 +56,8 @@ pub struct Config {
     pub max_rows: usize,
     pub max_body_bytes: usize,
     pub query_timeout: Duration,
+    /// How long an upload body may take to arrive (it holds a permit while it does).
+    pub upload_timeout: Duration,
     pub max_concurrent: usize,
     /// The container memory limit in bytes, when known (the memory guard).
     pub memory_limit: Option<u64>,
@@ -69,6 +73,7 @@ impl Config {
             max_rows: DEFAULT_MAX_ROWS,
             max_body_bytes: DEFAULT_MAX_BODY_BYTES,
             query_timeout: DEFAULT_QUERY_TIMEOUT,
+            upload_timeout: DEFAULT_UPLOAD_TIMEOUT,
             max_concurrent: DEFAULT_MAX_CONCURRENT,
             memory_limit: None,
             log: Arc::new(|_| {}),
@@ -291,27 +296,10 @@ where
     T: Send + 'static,
     F: FnOnce() -> Result<T, ApiError> + Send + 'static,
 {
-    let permits = state.0.work.clone();
+    let state = state.clone();
     let task = async move {
-        let permit = permits.acquire_owned().await.map_err(|_| {
-            ApiError::new(
-                StatusCode::SERVICE_UNAVAILABLE,
-                "unavailable",
-                "shutting down",
-            )
-        })?;
-        tokio::task::spawn_blocking(move || {
-            let _permit = permit;
-            work()
-        })
-        .await
-        .map_err(|_| {
-            ApiError::new(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "internal",
-                "the engine failed on this request",
-            )
-        })?
+        let permit = acquire(&state).await?;
+        run_with_permit(permit, work).await
     };
     match timeout {
         Some(limit) => tokio::time::timeout(limit, task).await.map_err(|_| {
@@ -323,6 +311,37 @@ where
         })?,
         None => task.await,
     }
+}
+
+/// Waits for one of the `max_concurrent` permits.
+async fn acquire(state: &State) -> Result<OwnedSemaphorePermit, ApiError> {
+    state.0.work.clone().acquire_owned().await.map_err(|_| {
+        ApiError::new(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "unavailable",
+            "shutting down",
+        )
+    })
+}
+
+/// Runs `work` on the blocking pool; the permit is released when the work ends.
+async fn run_with_permit<T, F>(permit: OwnedSemaphorePermit, work: F) -> Result<T, ApiError>
+where
+    T: Send + 'static,
+    F: FnOnce() -> Result<T, ApiError> + Send + 'static,
+{
+    tokio::task::spawn_blocking(move || {
+        let _permit = permit;
+        work()
+    })
+    .await
+    .map_err(|_| {
+        ApiError::new(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "internal",
+            "the engine failed on this request",
+        )
+    })?
 }
 
 async fn health(AxumState(state): AxumState<State>) -> Result<Json<Value>, ApiError> {
@@ -401,7 +420,22 @@ async fn upload(
 ) -> Result<Response, ApiError> {
     check_name(&name)?;
     let format = upload_format(&query, &headers)?;
-    let body = read_body(&headers, body, state.0.config.upload_cap()).await?;
+    // The permit is taken before the body is read, so at most `max_concurrent` uploads are held in
+    // memory at once; the read deadline stops a stalled upload from holding it for ever.
+    let permit = acquire(&state).await?;
+    let cap = state.0.config.upload_cap();
+    let body = tokio::time::timeout(
+        state.0.config.upload_timeout,
+        read_body(&headers, body, cap),
+    )
+    .await
+    .map_err(|_| {
+        ApiError::new(
+            StatusCode::REQUEST_TIMEOUT,
+            "timeout",
+            "the upload did not arrive within its time limit",
+        )
+    })??;
     if body.is_empty() {
         return Err(ApiError::new(
             StatusCode::BAD_REQUEST,
@@ -410,8 +444,8 @@ async fn upload(
         ));
     }
     let dir = state.dir().to_path_buf();
-    // No timeout: an upload that answered 504 would still land a moment later.
-    let (dataset, replaced) = run_blocking(&state, None, move || {
+    // No timeout once the body is in: an upload that answered 504 would still land a moment later.
+    let (dataset, replaced) = run_with_permit(permit, move || {
         Ok(datasets::store(&dir, &name, format, &body)?)
     })
     .await?;

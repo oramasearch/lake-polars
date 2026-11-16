@@ -25,6 +25,7 @@ its table; this page is the whole API as built.
 | `LAKE_POLARS_ADDR` | `0.0.0.0:8080` | the listen address |
 | `LAKE_POLARS_MAX_BODY_BYTES` | `268435456` (256 MiB) | the largest upload |
 | `LAKE_POLARS_QUERY_TIMEOUT_SECONDS` | `30` | the query time limit |
+| `LAKE_POLARS_UPLOAD_TIMEOUT_SECONDS` | `300` | how long an upload body may take to arrive once it has its slot |
 | `LAKE_POLARS_MAX_CONCURRENT` | `2` | how many queries and uploads run at once |
 | `LAKE_POLARS_MEMORY_LIMIT` | unset | the container memory limit in bytes (the operator passes `limits.memory`); see *Memory* below |
 | `LAKE_POLARS_THREADS` | unset (every CPU the container may use) | Polars' thread pool size; set as `POLARS_MAX_THREADS` before Polars starts |
@@ -77,8 +78,11 @@ one, and a failed upload leaves nothing behind.
 `type` is Polars' name for the column type (`i64`, `f64`, `str`, `bool`, `date`,
 `datetime[μs]`, …). `bytes` is the Parquet file's size.
 
-Uploads have no time limit (a timed-out upload would still land a moment later), but they share the
-`LAKE_POLARS_MAX_CONCURRENT` slots with queries.
+An upload takes one of the `LAKE_POLARS_MAX_CONCURRENT` slots it shares with queries **before its
+body is read**, so no more than that many uploads are held in memory at once. The body must arrive
+within `LAKE_POLARS_UPLOAD_TIMEOUT_SECONDS` (300 s) of the upload getting its slot, or the answer is
+`408 timeout` and nothing is stored. Once the body is in, parsing and writing have no time limit (an
+upload that answered `504` would still land a moment later).
 
 ### `GET /v1/datasets`
 
@@ -159,6 +163,7 @@ Every error is `{"error": {"code": "...", "message": "..."}}`:
 | 404 | `not_found` | an unknown route (with a valid token), or `DELETE` of a dataset that does not exist |
 | 405 | `method_not_allowed` | a route called with the wrong method |
 | 413 | `body_too_large` | an upload over the upload cap (below), or a query body over 1 MiB |
+| 408 | `timeout` | an upload body did not arrive within `LAKE_POLARS_UPLOAD_TIMEOUT_SECONDS` |
 | 415 | `unsupported_format` | no usable `?format=` or `Content-Type` on an upload |
 | 500 | `internal` | an unexpected failure (including a Polars panic, which is caught) |
 | 503 | `unavailable` | `/healthz`: the directory is not usable |
@@ -185,7 +190,8 @@ the process (the pod restarts; datasets on the volume survive). The guard in fro
 - **does** lower the upload cap to a quarter of the memory limit (a parsed upload and the Parquet
   writer take several times the raw bytes), so an upload that would certainly not fit is refused
   with `413` before it is read;
-- **does** bound how many queries and uploads hold memory at once (the concurrency slots);
+- **does** bound how many queries and uploads hold memory at once (the concurrency slots; an upload
+  takes its slot before its body is read);
 - **does not** bound one query's own memory: a join or sort over large datasets can still exceed the
   limit. Keep queries selective (filters and projections are pushed into the Parquet scans) and size
   `limits.memory` for the largest query expected.
@@ -235,7 +241,8 @@ replacing, a join with an aggregate, value types, the row cap and `truncated`, t
 wrong, prefix, suffix, another scheme; `/healthz` without one), `/healthz` failing without its
 directory, delete, invalid names, formats and bodies, the body cap and the memory guard's upload
 cap, the sandbox refusing `read_csv('/etc/passwd')`, `read_parquet`, `read_json`, `read_ipc` at any
-depth and every non-query statement, the query timeout, and that the request log never carries the
+depth and every non-query statement, the query timeout, an upload holding its slot while its body
+arrives and answering `408` when it stalls, and that the request log never carries the
 SQL, data or a token.
 
 ## Known limits

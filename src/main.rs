@@ -12,6 +12,7 @@
 //! LAKE_POLARS_ADDR                  the listen address (default 0.0.0.0:8080)
 //! LAKE_POLARS_MAX_BODY_BYTES        the largest upload (default 268435456, 256 MiB)
 //! LAKE_POLARS_QUERY_TIMEOUT_SECONDS the query time limit (default 30)
+//! LAKE_POLARS_UPLOAD_TIMEOUT_SECONDS how long an upload body may take to arrive (default 300)
 //! LAKE_POLARS_MAX_CONCURRENT        queries and uploads running at once (default 2)
 //! LAKE_POLARS_MEMORY_LIMIT          the container memory limit in bytes (optional)
 //! LAKE_POLARS_THREADS               Polars' thread pool size (optional; POLARS_MAX_THREADS)
@@ -61,13 +62,21 @@ fn config() -> Result<(Config, SocketAddr), String> {
         "LAKE_POLARS_QUERY_TIMEOUT_SECONDS",
         server::DEFAULT_QUERY_TIMEOUT.as_secs(),
     )?);
+    config.upload_timeout = Duration::from_secs(env_number(
+        "LAKE_POLARS_UPLOAD_TIMEOUT_SECONDS",
+        server::DEFAULT_UPLOAD_TIMEOUT.as_secs(),
+    )?);
     config.max_concurrent =
         env_number("LAKE_POLARS_MAX_CONCURRENT", server::DEFAULT_MAX_CONCURRENT)?;
     config.memory_limit = match env("LAKE_POLARS_MEMORY_LIMIT") {
         None => None,
         Some(_) => Some(env_number::<u64>("LAKE_POLARS_MEMORY_LIMIT", 0)?).filter(|n| *n > 0),
     };
-    if config.max_body_bytes == 0 || config.query_timeout.is_zero() || config.max_concurrent == 0 {
+    if config.max_body_bytes == 0
+        || config.query_timeout.is_zero()
+        || config.upload_timeout.is_zero()
+        || config.max_concurrent == 0
+    {
         return Err("limits must be greater than zero".into());
     }
     config.log = Arc::new(|line| println!("{line}"));

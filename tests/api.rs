@@ -544,3 +544,49 @@ async fn the_log_never_carries_sql_data_or_the_token() {
         }
     }
 }
+
+/// An upload holds a permit while its body arrives, so concurrent uploads cannot buffer more than
+/// `max_concurrent` bodies; one that stalls is cut off at the upload time limit with `408`.
+#[tokio::test(flavor = "multi_thread")]
+async fn an_upload_holds_its_permit_while_it_arrives_and_times_out() {
+    use std::io::{Read, Write};
+
+    let h = harness_with(|c| {
+        c.max_concurrent = 1;
+        c.query_timeout = Duration::from_millis(300);
+        c.upload_timeout = Duration::from_millis(1500);
+    });
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let app = h.app.clone();
+    tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+
+    // The headers promise 100 bytes; only 4 ever come.
+    let mut stalled = std::net::TcpStream::connect(addr).unwrap();
+    write!(
+        stalled,
+        "POST /v1/datasets/slow HTTP/1.1\r\nHost: x\r\nAuthorization: Bearer {TOKEN}\r\n\
+         Content-Type: text/csv\r\nContent-Length: 100\r\n\r\na,b\n"
+    )
+    .unwrap();
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    let (status, body) = h.query("SELECT 1 AS one").await;
+    assert_eq!(status, StatusCode::GATEWAY_TIMEOUT, "{body}");
+
+    let answer = tokio::task::spawn_blocking(move || {
+        stalled
+            .set_read_timeout(Some(Duration::from_secs(10)))
+            .unwrap();
+        let mut buf = [0u8; 512];
+        let n = stalled.read(&mut buf).unwrap();
+        String::from_utf8_lossy(&buf[..n]).to_string()
+    })
+    .await
+    .unwrap();
+    assert!(answer.starts_with("HTTP/1.1 408"), "{answer}");
+    assert!(answer.contains("\"timeout\""), "{answer}");
+
+    let (status, body) = h.query("SELECT 1 AS one").await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+}
