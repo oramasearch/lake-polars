@@ -11,6 +11,8 @@ could read files off the host are refused before they run.
 Part of [Orama Lake](https://github.com/oramasearch/lake-platform), the sovereign AI stack.
 MIT-licensed.
 
+Latest release: [v0.1.0](docs/releases/v0.1.0.md).
+
 ## What it does
 
 - **Datasets**: upload CSV, JSON Lines or Parquet up to 256 MiB, stored as Parquet; replace, list
@@ -90,6 +92,7 @@ Nothing calls out from lake-polars: it only answers HTTP.
   build and local run.
 - [`docs/security.md`](docs/security.md): the trust boundaries, what is defended and how, and the
   security review record.
+- [`docs/releases/`](docs/releases/README.md): the release notes.
 - [`docs/README.md`](docs/README.md): the docs index.
 
 ## Community
