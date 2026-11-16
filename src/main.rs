@@ -27,6 +27,9 @@ use std::time::Duration;
 use lake_polars::{datasets, router, server, Config, State};
 use serde_json::json;
 
+#[global_allocator]
+static ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 fn log(level: &str, msg: &str, extra: serde_json::Value) {
     let mut line = json!({"level": level, "msg": msg});
     if let (Some(line), Some(extra)) = (line.as_object_mut(), extra.as_object()) {

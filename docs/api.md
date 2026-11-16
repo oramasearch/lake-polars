@@ -14,7 +14,7 @@ its table; this page is the whole API as built.
 | Image | `oramasearch/lake-polars:<tag>` (Docker Hub), built from [`Dockerfile`](../Dockerfile) for `linux/amd64` |
 | Engine | the open-source [`polars`](https://github.com/pola-rs/polars) crate 0.55.2, **MIT**, with its SQL front end (`polars-sql`) |
 | HTTP | `axum` 0.8.9 on `tokio` 1.53.1, both **MIT** |
-| Runtime | `gcr.io/distroless/cc-debian12:nonroot` (glibc, no shell), user `65532:65532`, one binary |
+| Runtime | `scratch`: one statically linked musl binary and nothing else (no libc, no shell), user `65532:65532`; allocator `mimalloc` (MIT) |
 
 ## Configuration
 
@@ -42,7 +42,7 @@ and can never name a path outside the directory. Other files in the directory ar
 
 Datasets are **per worker**: with `instances` above 1, each worker has its own volume and its own
 datasets, and the Service spreads requests across workers, so an upload lands on one worker only.
-Until shared storage exists (lake#196), **1 is the only useful `instances` value**.
+Until shared storage exists, **1 is the only useful `instances` value**.
 
 ## API
 
@@ -211,13 +211,15 @@ query bodies up to 1 MiB. The whole upload is held in memory while it is parsed.
 ## Build
 
 ```sh
-docker buildx build --platform linux/amd64 -t oramasearch/lake-polars:<tag> .
-# or: make docker-build IMG=oramasearch/lake-polars:<tag>
+docker buildx build --platform linux/amd64 -t lake-polars:<tag> .
+# or: make docker-build IMG=lake-polars:<tag>
 ```
 
-Build on native amd64 (for example a BuildKit on amd64), never under emulation. The builder is
-`rust:1.95-bookworm` and the runtime `gcr.io/distroless/cc-debian12:nonroot`, both digest-pinned,
-both Debian 12 glibc. The chart's default is `lakeServices.polarsImage:
+Build on a native host of the target architecture (for example a BuildKit on amd64), never under
+emulation. The builder is `rust:1.95-alpine` (digest-pinned), whose Rust targets musl and links
+statically; the build fails if the binary has any dynamic dependency. The runtime is `scratch`: the
+image holds the binary, an empty `/data` owned by `65532` and a `/tmp`, and nothing else, so it
+carries no GPL or LGPL code. The operator's chart default is `lakeServices.polarsImage:
 oramasearch/lake-polars:0.1.0`, so that tag must be published before a Polars service can start; a Lake overrides it
 with `spec.services.polarsImage`.
 
@@ -247,7 +249,7 @@ SQL, data or a token.
 
 ## Known limits
 
-- **Datasets are per worker** until shared storage (lake#196): use `instances: 1`.
+- **Datasets are per worker** until shared storage exists: use `instances: 1`.
 - **One copy.** Each worker's datasets live on one `ReadWriteOnce` volume, with no replication and
   no backup yet: a lost volume loses them.
 - One query's memory is not bounded below the container limit (see *Memory*).

@@ -2,8 +2,9 @@ Third-party software in lake-polars
 
 lake-polars is licensed under the MIT License (see LICENSE). It includes or uses the components
 below, each under its own license. This file is generated; do not edit it by hand.
-Generated with: cargo metadata --format-version 1 --locked --filter-platform x86_64-unknown-linux-gnu, walking
-the normal (linked) dependency graph, with each crate's license files from the cargo registry
+Generated with: python3 tools/third-party-licenses.py (cargo metadata --locked --filter-platform
+x86_64-unknown-linux-musl, walking the normal (linked) dependency graph, with each crate's license files from
+the cargo registry)
 From: Cargo.toml and Cargo.lock
 
 Summary
@@ -90,7 +91,7 @@ futures-macro                0.3.34             MIT OR Apache-2.0               
 futures-sink                 0.3.34             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-lang/futures-rs
 futures-task                 0.3.34             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-lang/futures-rs
 futures-util                 0.3.34             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-lang/futures-rs
-generic-array                0.14.7             MIT                                                      Rust crate (linked)  https://github.com/fizyk20/generic-array.git
+generic-array                0.14.7             MIT                                                      Rust crate (linked)  https://github.com/fizyk20/generic-array
 getrandom                    0.2.17             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-random/getrandom
 getrandom                    0.3.4              MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-random/getrandom
 getrandom                    0.4.3              MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-random/getrandom
@@ -122,7 +123,7 @@ icu_normalizer_data          2.3.0              Unicode-3.0                     
 icu_properties               2.3.0              Unicode-3.0                                              Rust crate (linked)  https://github.com/unicode-org/icu4x
 icu_properties_data          2.3.0              Unicode-3.0                                              Rust crate (linked)  https://github.com/unicode-org/icu4x
 icu_provider                 2.3.1              Unicode-3.0                                              Rust crate (linked)  https://github.com/unicode-org/icu4x
-idna                         1.1.0              MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/servo/rust-url/
+idna                         1.1.0              MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/servo/rust-url
 idna_adapter                 1.2.2              Apache-2.0 OR MIT                                        Rust crate (linked)  https://github.com/hsivonen/idna_adapter
 indexmap                     2.14.2             Apache-2.0 OR MIT                                        Rust crate (linked)  https://github.com/indexmap-rs/indexmap
 ipnet                        2.12.2             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/krisprice/ipnet
@@ -131,6 +132,7 @@ itoa                         1.0.18             MIT OR Apache-2.0               
 jsonpath_lib_polars_vendor   0.0.1              MIT                                                      Rust crate (linked)  https://github.com/freestrings/jsonpath
 libc                         0.2.189            MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-lang/libc
 libm                         0.2.16             MIT                                                      Rust crate (linked)  https://github.com/rust-lang/compiler-builtins
+libmimalloc-sys              0.1.49             MIT                                                      Rust crate (linked)  https://github.com/purpleprotocol/mimalloc_rust/tree/master/libmimalloc-sys
 linux-raw-sys                0.12.1             Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT      Rust crate (linked)  https://github.com/sunfishcode/linux-raw-sys
 litemap                      0.8.3              Unicode-3.0                                              Rust crate (linked)  https://github.com/unicode-org/icu4x
 lock_api                     0.4.14             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/Amanieu/parking_lot
@@ -141,6 +143,7 @@ lz4-sys                      1.11.1+lz4-1.10.0  MIT                             
 matchit                      0.8.4              MIT AND BSD-3-Clause                                     Rust crate (linked)  https://github.com/ibraheemdev/matchit
 memchr                       2.8.3              Unlicense OR MIT                                         Rust crate (linked)  https://github.com/BurntSushi/memchr
 memmap2                      0.9.11             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/RazrFalcon/memmap2-rs
+mimalloc                     0.1.52             MIT                                                      Rust crate (linked)  https://github.com/purpleprotocol/mimalloc_rust
 mime                         0.3.17             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/hyperium/mime
 miniz_oxide                  0.9.1              MIT OR Zlib OR Apache-2.0                                Rust crate (linked)  https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide
 mio                          1.2.3              MIT                                                      Rust crate (linked)  https://github.com/tokio-rs/mio
@@ -153,7 +156,7 @@ openssl-probe                0.2.1              MIT OR Apache-2.0               
 parking                      2.2.1              Apache-2.0 OR MIT                                        Rust crate (linked)  https://github.com/smol-rs/parking
 parking_lot                  0.12.5             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/Amanieu/parking_lot
 parking_lot_core             0.9.12             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/Amanieu/parking_lot
-percent-encoding             2.3.2              MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/servo/rust-url/
+percent-encoding             2.3.2              MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/servo/rust-url
 phf                          0.12.1             MIT                                                      Rust crate (linked)  https://github.com/rust-phf/rust-phf
 phf_shared                   0.12.1             MIT                                                      Rust crate (linked)  https://github.com/rust-phf/rust-phf
 pin-project-lite             0.2.17             Apache-2.0 OR MIT                                        Rust crate (linked)  https://github.com/taiki-e/pin-project-lite
@@ -186,7 +189,7 @@ polars-time                  0.55.2             MIT                             
 polars-utils                 0.55.2             MIT                                                      Rust crate (linked)  https://github.com/pola-rs/polars
 potential_utf                0.1.6              Unicode-3.0                                              Rust crate (linked)  https://github.com/unicode-org/icu4x
 proc-macro2                  1.0.107            MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/dtolnay/proc-macro2
-psm                          0.1.32             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-lang/stacker/
+psm                          0.1.32             MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/rust-lang/stacker
 quick-xml                    0.39.4             MIT                                                      Rust crate (linked)  https://github.com/tafia/quick-xml
 quinn                        0.11.12            MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/quinn-rs/quinn
 quinn-proto                  0.11.18            MIT OR Apache-2.0                                        Rust crate (linked)  https://github.com/quinn-rs/quinn
@@ -305,12 +308,12 @@ zstd-sys                     2.1.0+zstd.1.5.7   BSD-3-Clause                    
 
 Rust toolchain and container base image
 
-The binary is compiled with the Rust toolchain (rust:1.95-bookworm, pinned by digest, used only to build);
-the Rust standard library linked into it is MIT OR Apache-2.0. The image runs
-FROM gcr.io/distroless/cc-debian12:nonroot, pinned by digest (https://github.com/GoogleContainerTools/
-distroless, Apache-2.0), which holds Debian 12's glibc (LGPL-2.1, linked dynamically), libgcc and libstdc++ (GPL-3.0 with the
-GCC Runtime Library Exception), ca-certificates, tzdata and base-files; their licenses are recorded in the image at /usr/share/doc/*/copyright. The image is not
-part of this repository's source.
+The binary is compiled with the Rust toolchain (rust:1.95-alpine, pinned by digest, used only to
+build) for x86_64-unknown-linux-musl and linked statically: the Rust standard library (MIT OR
+Apache-2.0), musl libc (MIT, https://musl.libc.org) and LLVM's libunwind (Apache-2.0 WITH
+LLVM-exception) are linked into it. The image is FROM scratch: it holds that one binary and two
+empty directories, and no other software. The builder image is not shipped and is not part of this
+repository's source.
 
 ================================================================================
 adler2 2.0.1 — 0BSD OR MIT OR Apache-2.0
@@ -16021,7 +16024,7 @@ DEALINGS IN THE SOFTWARE.
 
 ================================================================================
 generic-array 0.14.7 — MIT
-https://github.com/fizyk20/generic-array.git
+https://github.com/fizyk20/generic-array
 --------------------------------------------------------------------------------
 [LICENSE]
 The MIT License (MIT)
@@ -20968,7 +20971,7 @@ ICU 1.8.1 to ICU 57.1 © 1995-2016 International Business Machines Corporation a
 
 ================================================================================
 idna 1.1.0 — MIT OR Apache-2.0
-https://github.com/servo/rust-url/
+https://github.com/servo/rust-url
 --------------------------------------------------------------------------------
 [LICENSE-APACHE]
 Apache License
@@ -22826,6 +22829,60 @@ have been licensed under extremely permissive terms.
 Copyright notices are retained in src/* files where relevant.
 
 ================================================================================
+libmimalloc-sys 0.1.49 — MIT
+https://github.com/purpleprotocol/mimalloc_rust/tree/master/libmimalloc-sys
+--------------------------------------------------------------------------------
+[LICENSE.txt]
+Copyright 2019 Octavian Oncescu
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+[c_src/mimalloc/v2/LICENSE]
+MIT License
+
+Copyright (c) 2018-2025 Microsoft Corporation, Daan Leijen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
 linux-raw-sys 0.12.1 — Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
 https://github.com/sunfishcode/linux-raw-sys
 --------------------------------------------------------------------------------
@@ -24119,6 +24176,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+[liblz4/lib/LICENSE]
+LZ4 Library
+Copyright (c) 2011-2020, Yann Collet
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice, this
+  list of conditions and the following disclaimer in the documentation and/or
+  other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 ================================================================================
 matchit 0.8.4 — MIT AND BSD-3-Clause
 https://github.com/ibraheemdev/matchit
@@ -24419,6 +24502,37 @@ limitations under the License.
 [LICENSE-MIT]
 Copyright (c) 2020 Yevhenii Reizner
 Copyright (c) 2015 Dan Burkert
+
+Permission is hereby granted, free of charge, to any
+person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the
+Software without restriction, including without
+limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software
+is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+
+================================================================================
+mimalloc 0.1.52 — MIT
+https://github.com/purpleprotocol/mimalloc_rust
+--------------------------------------------------------------------------------
+[LICENSE.txt]
+Copyright 2019 Octavian Oncescu
 
 Permission is hereby granted, free of charge, to any
 person obtaining a copy of this software and associated
@@ -26836,7 +26950,7 @@ DEALINGS IN THE SOFTWARE.
 
 ================================================================================
 percent-encoding 2.3.2 — MIT OR Apache-2.0
-https://github.com/servo/rust-url/
+https://github.com/servo/rust-url
 --------------------------------------------------------------------------------
 [LICENSE-APACHE]
 Apache License
@@ -28977,7 +29091,7 @@ DEALINGS IN THE SOFTWARE.
 
 ================================================================================
 psm 0.1.32 — MIT OR Apache-2.0
-https://github.com/rust-lang/stacker/
+https://github.com/rust-lang/stacker
 --------------------------------------------------------------------------------
 [LICENSE-APACHE]
 Apache License
@@ -40648,7 +40762,7 @@ TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
 PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
 
 ================================================================================
 syn 2.0.119 — MIT OR Apache-2.0
@@ -46621,6 +46735,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 [LICENSE.BSD-3-Clause]
 The auto-generated bindings are under the 3-clause BSD license:
 
+BSD License
+
+For Zstandard software
+
+Copyright (c) Meta Platforms, Inc. and affiliates. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+ * Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+ * Neither the name Facebook, nor Meta, nor the names of its contributors may
+   be used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+[zstd/LICENSE]
 BSD License
 
 For Zstandard software
