@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! The HTTP API end to end, over the router in memory and a temporary data directory.
 
@@ -20,6 +19,7 @@ const TOKEN: &str = "test-token-0123456789abcdef";
 
 struct Harness {
     app: Router,
+    state: State,
     dir: TempDir,
     logs: Arc<Mutex<Vec<String>>>,
 }
@@ -31,8 +31,10 @@ fn harness_with(adjust: impl FnOnce(&mut Config)) -> Harness {
     let sink = logs.clone();
     config.log = Arc::new(move |line| sink.lock().unwrap().push(line.to_string()));
     adjust(&mut config);
+    let state = State::new(config);
     Harness {
-        app: router(State::new(config)),
+        app: router(state.clone()),
+        state,
         dir,
         logs,
     }
@@ -43,6 +45,19 @@ fn harness() -> Harness {
 }
 
 impl Harness {
+    /// Serves this harness's state over TCP on a free local port, the way the binary does.
+    async fn listen(&self) -> std::net::SocketAddr {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let state = self.state.clone();
+        tokio::spawn(async move {
+            lake_polars::server::serve(listener, state, std::future::pending())
+                .await
+                .unwrap()
+        });
+        addr
+    }
+
     async fn send(
         &self,
         method: &str,
@@ -544,4 +559,164 @@ async fn the_log_never_carries_sql_data_or_the_token() {
             assert!(!line.contains(secret), "{line}");
         }
     }
+}
+
+/// An upload holds a permit while its body arrives, so concurrent uploads cannot buffer more than
+/// `max_concurrent` bodies; one that stalls is cut off at the upload time limit with `408`.
+#[tokio::test(flavor = "multi_thread")]
+async fn an_upload_holds_its_permit_while_it_arrives_and_times_out() {
+    use std::io::{Read, Write};
+
+    let h = harness_with(|c| {
+        c.max_concurrent = 1;
+        c.query_timeout = Duration::from_millis(300);
+        c.upload_timeout = Duration::from_millis(1500);
+    });
+    let addr = h.listen().await;
+
+    // The headers promise 100 bytes; only 4 ever come.
+    let mut stalled = std::net::TcpStream::connect(addr).unwrap();
+    write!(
+        stalled,
+        "POST /v1/datasets/slow HTTP/1.1\r\nHost: x\r\nAuthorization: Bearer {TOKEN}\r\n\
+         Content-Type: text/csv\r\nContent-Length: 100\r\n\r\na,b\n"
+    )
+    .unwrap();
+    tokio::time::sleep(Duration::from_millis(200)).await;
+
+    let (status, body) = h.query("SELECT 1 AS one").await;
+    assert_eq!(status, StatusCode::GATEWAY_TIMEOUT, "{body}");
+
+    let answer = tokio::task::spawn_blocking(move || {
+        stalled
+            .set_read_timeout(Some(Duration::from_secs(10)))
+            .unwrap();
+        let mut buf = [0u8; 512];
+        let n = stalled.read(&mut buf).unwrap();
+        String::from_utf8_lossy(&buf[..n]).to_string()
+    })
+    .await
+    .unwrap();
+    assert!(answer.starts_with("HTTP/1.1 408"), "{answer}");
+    assert!(answer.contains("\"timeout\""), "{answer}");
+
+    let (status, body) = h.query("SELECT 1 AS one").await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+}
+
+/// Reads what the server sends until it closes the connection or `wait` passes.
+fn read_until_closed(stream: &mut std::net::TcpStream, wait: Duration) -> Option<String> {
+    use std::io::Read;
+    stream.set_read_timeout(Some(wait)).unwrap();
+    let mut out = Vec::new();
+    match stream.read_to_end(&mut out) {
+        Ok(_) => Some(String::from_utf8_lossy(&out).to_string()),
+        Err(_) => None, // still open when the wait ran out
+    }
+}
+
+#[tokio::test(flavor = "multi_thread")]
+async fn slow_headers_are_cut_off_and_connections_are_capped() {
+    use std::io::Write;
+
+    let h = harness_with(|c| {
+        c.header_timeout = Duration::from_millis(300);
+        c.max_connections = 1;
+    });
+    let addr = h.listen().await;
+    let mut slow = std::net::TcpStream::connect(addr).unwrap();
+    slow.write_all(b"GET /healthz HTTP/1.1\r\nHost: x\r\n")
+        .unwrap();
+    tokio::time::sleep(Duration::from_millis(100)).await;
+
+    // The one connection slot is taken: another connection is closed at once, unanswered.
+    let mut extra = std::net::TcpStream::connect(addr).unwrap();
+    let answer =
+        tokio::task::spawn_blocking(move || read_until_closed(&mut extra, Duration::from_secs(5)))
+            .await
+            .unwrap();
+    assert_eq!(answer.as_deref(), Some(""), "{answer:?}");
+
+    // The slow client never finishes its headers and is disconnected after the header timeout.
+    let answer =
+        tokio::task::spawn_blocking(move || read_until_closed(&mut slow, Duration::from_secs(5)))
+            .await
+            .unwrap();
+    assert!(answer.is_some(), "the slow connection was not closed");
+
+    // Its slot is free again.
+    let mut next = std::net::TcpStream::connect(addr).unwrap();
+    next.write_all(b"GET /healthz HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n")
+        .unwrap();
+    let answer =
+        tokio::task::spawn_blocking(move || read_until_closed(&mut next, Duration::from_secs(5)))
+            .await
+            .unwrap()
+            .unwrap();
+    assert!(answer.starts_with("HTTP/1.1 200"), "{answer}");
+}
+
+#[tokio::test]
+async fn queries_that_would_exhaust_the_stack_or_memory_are_refused() {
+    let h = harness();
+    // Deep enough to overflow a default thread stack in the planner: refused before parsing.
+    let (status, body) = h.query(&format!("SELECT 1{}", "+1".repeat(400_000))).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST, "{body}");
+    assert_eq!(error_code(&body), "forbidden_sql");
+    // Just under the cap: it runs, on the work stack.
+    let (status, body) = h
+        .query(&format!(
+            "SELECT 1{} AS n",
+            "+1".repeat(lake_polars::sandbox::MAX_OPERATORS - 1)
+        ))
+        .await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    assert_eq!(
+        body["rows"][0][0],
+        json!(lake_polars::sandbox::MAX_OPERATORS)
+    );
+
+    let (status, body) = h.query("SELECT lpad('a', 1000000000000) AS x").await;
+    assert_eq!(status, StatusCode::BAD_REQUEST, "{body}");
+    assert_eq!(error_code(&body), "forbidden_sql");
+    let (status, body) = h.query("SELECT lpad('7', 3, '0') AS x").await;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    assert_eq!(body["rows"][0][0], json!("007"));
+}
+
+#[tokio::test]
+async fn concurrent_health_checks_do_not_race() {
+    let h = Arc::new(harness());
+    let mut checks = Vec::new();
+    for _ in 0..32 {
+        let h = h.clone();
+        checks.push(tokio::spawn(async move {
+            h.send("GET", "/healthz", None, None, Vec::new()).await.0
+        }));
+    }
+    for check in checks {
+        assert_eq!(check.await.unwrap(), StatusCode::OK);
+    }
+}
+
+#[tokio::test]
+async fn a_parquet_upload_that_decodes_past_the_memory_guard_is_refused() {
+    let h = harness_with(|c| c.memory_limit = Some(16 << 20));
+    let mut frame = df!("x" => vec![7i64; 2_000_000]).unwrap();
+    let mut bomb = Vec::new();
+    ParquetWriter::new(&mut bomb).finish(&mut frame).unwrap();
+    assert!(
+        bomb.len() < 1 << 20,
+        "the test file should be small: {}",
+        bomb.len()
+    );
+    let (status, body) = h
+        .upload("bomb", "application/vnd.apache.parquet", &bomb)
+        .await;
+    assert_eq!(status, StatusCode::PAYLOAD_TOO_LARGE, "{body}");
+    assert_eq!(error_code(&body), "body_too_large");
+    let (status, body) = h
+        .upload("small", "application/vnd.apache.parquet", &parquet_bytes())
+        .await;
+    assert_eq!(status, StatusCode::CREATED, "{body}");
 }

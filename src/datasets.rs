@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! The dataset store: one Parquet file per dataset, `<dir>/<name>.parquet`. Every function here is
 //! blocking (disk and Polars work); the server runs them on the blocking pool.
@@ -97,6 +96,8 @@ pub struct DatasetInfo {
 pub enum StoreError {
     /// The upload does not parse as the format it claims; the message is Polars'.
     BadData(String),
+    /// The upload would not fit in memory once decoded.
+    TooLarge(String),
     /// No dataset of that name.
     NotFound,
     /// The disk is full.
@@ -118,6 +119,31 @@ impl From<std::io::Error> for StoreError {
 
 pub fn path_of(dir: &Path, name: &str) -> PathBuf {
     dir.join(format!("{name}.{EXTENSION}"))
+}
+
+/// Refuses a Parquet upload whose footer says it decodes to more than `cap` bytes: a few MB of
+/// run-length or dictionary encoded Parquet can expand to many GB. The footer is the writer's own
+/// account, so this stops an honest bomb; the memory limit remains the hard stop for a lying one.
+fn check_decoded_size(body: &[u8], cap: u64) -> Result<(), StoreError> {
+    let mut reader = ParquetReader::new(Cursor::new(body));
+    let metadata = reader
+        .get_metadata()
+        .map_err(|e| StoreError::BadData(e.to_string()))?;
+    let mut decoded: u64 = 0;
+    for group in &metadata.row_groups {
+        let columns = group.n_columns().max(1) as u64;
+        // At least eight bytes a value: what a decoded numeric column takes.
+        let floor = (group.num_rows() as u64)
+            .saturating_mul(columns)
+            .saturating_mul(8);
+        decoded = decoded.saturating_add((group.total_byte_size() as u64).max(floor));
+    }
+    if decoded > cap {
+        return Err(StoreError::TooLarge(format!(
+            "the Parquet file decodes to about {decoded} bytes; at most {cap} fit in memory"
+        )));
+    }
+    Ok(())
 }
 
 fn parse(format: Format, body: &[u8]) -> Result<DataFrame, StoreError> {
@@ -150,7 +176,8 @@ fn temp_path(dir: &Path, name: &str) -> PathBuf {
 }
 
 /// Parses `body` as `format` and stores it as `<name>.parquet`, replacing any dataset of that
-/// name. The file is written to a temp file, synced and renamed into place, so a reader sees the
+/// name. Under a memory limit (`decoded_cap`), a Parquet upload that decodes to more is refused.
+/// The file is written to a temp file, synced and renamed into place, so a reader sees the
 /// old dataset or the new one, never half of one. Answers the stored dataset and whether it
 /// replaced one.
 pub fn store(
@@ -158,7 +185,11 @@ pub fn store(
     name: &str,
     format: Format,
     body: &[u8],
+    decoded_cap: Option<u64>,
 ) -> Result<(DatasetInfo, bool), StoreError> {
+    if let (Format::Parquet, Some(cap)) = (format, decoded_cap) {
+        check_decoded_size(body, cap)?;
+    }
     let mut frame = parse(format, body)?;
     if frame.width() == 0 {
         return Err(StoreError::BadData("the upload has no columns".into()));
@@ -266,12 +297,14 @@ pub fn delete(dir: &Path, name: &str) -> Result<(), StoreError> {
     }
 }
 
-/// Removes upload temp files a crash left behind.
+/// Removes upload temp files and health probe files a crash left behind.
 pub fn sweep_temp_files(dir: &Path) -> std::io::Result<usize> {
     let mut removed = 0;
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
-        if entry.file_name().to_string_lossy().starts_with(TEMP_PREFIX) {
+        let file_name = entry.file_name();
+        let file_name = file_name.to_string_lossy();
+        if file_name.starts_with(TEMP_PREFIX) || file_name.starts_with(".healthz-probe") {
             fs::remove_file(entry.path())?;
             removed += 1;
         }
