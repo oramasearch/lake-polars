@@ -87,6 +87,10 @@ fn config() -> Result<(Config, SocketAddr), String> {
 }
 
 fn main() -> ExitCode {
+    if std::env::args().nth(1).as_deref() == Some("--version") {
+        println!("lake-polars {}", env!("CARGO_PKG_VERSION"));
+        return ExitCode::SUCCESS;
+    }
     // A panic's message can carry data (a value Polars choked on): log only where it happened.
     std::panic::set_hook(Box::new(|info| {
         let location = info
@@ -155,7 +159,7 @@ async fn serve(config: Config, addr: SocketAddr) -> Result<(), String> {
     log(
         "INFO",
         "lake-polars listening",
-        json!({"addr": addr.to_string(), "dir": dir.display().to_string(), "swept_temp_files": swept,
+        json!({"version": env!("CARGO_PKG_VERSION"), "addr": addr.to_string(), "dir": dir.display().to_string(), "swept_temp_files": swept,
                "upload_cap": config.upload_cap(), "max_concurrent": config.max_concurrent}),
     );
     server::serve(listener, State::new(config), shutdown_signal())
