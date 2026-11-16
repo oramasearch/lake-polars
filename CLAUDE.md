@@ -28,6 +28,9 @@
   `UNNEST`. On a Polars upgrade, re-read `polars-sql`'s `context.rs` (`execute_statement`,
   `get_table`) and `table_functions.rs` for new ways to reach files, and keep the tests in
   `tests/api.rs` (`file_reading_table_functions_are_refused`) green.
+- **Security model:** [`docs/security.md`](docs/security.md) lists every attack the service
+  defends against and where. A change that adds an entry point, a SQL function that allocates from
+  a literal, or a new way to hold a connection updates that table and adds a test.
 - **Never log** SQL, bodies, dataset contents, the query string, headers or the token.
 - **Build and verify:** `cargo build --locked && cargo clippy --locked --all-targets -- -D warnings
   && cargo test --locked` (`make lint test`). Debug builds are enough for tests.

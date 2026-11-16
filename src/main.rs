@@ -24,7 +24,7 @@ use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Duration;
 
-use lake_polars::{datasets, router, server, Config, State};
+use lake_polars::{datasets, server, Config, State};
 use serde_json::json;
 
 #[global_allocator]
@@ -87,6 +87,14 @@ fn config() -> Result<(Config, SocketAddr), String> {
 }
 
 fn main() -> ExitCode {
+    // A panic's message can carry data (a value Polars choked on): log only where it happened.
+    std::panic::set_hook(Box::new(|info| {
+        let location = info
+            .location()
+            .map(|l| format!("{}:{}", l.file(), l.line()))
+            .unwrap_or_default();
+        log("ERROR", "panic", json!({"location": location}));
+    }));
     // Polars sizes its thread pool from POLARS_MAX_THREADS the first time it is used, so this must
     // happen before any Polars call and before other threads exist.
     if let Some(threads) = env("LAKE_POLARS_THREADS") {
@@ -136,9 +144,11 @@ fn main() -> ExitCode {
 
 async fn serve(config: Config, addr: SocketAddr) -> Result<(), String> {
     let dir = config.dir.clone();
+    // Sweep first: temp files a crash left behind may be what filled the volume.
+    let swept = datasets::sweep_temp_files(&dir)
+        .map_err(|e| format!("the data directory {} is not usable: {e}", dir.display()))?;
     server::probe(&dir)
         .map_err(|e| format!("the data directory {} is not usable: {e}", dir.display()))?;
-    let swept = datasets::sweep_temp_files(&dir).map_err(|e| e.to_string())?;
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .map_err(|e| format!("listen on {addr}: {e}"))?;
@@ -148,8 +158,7 @@ async fn serve(config: Config, addr: SocketAddr) -> Result<(), String> {
         json!({"addr": addr.to_string(), "dir": dir.display().to_string(), "swept_temp_files": swept,
                "upload_cap": config.upload_cap(), "max_concurrent": config.max_concurrent}),
     );
-    axum::serve(listener, router(State::new(config)))
-        .with_graceful_shutdown(shutdown_signal())
+    server::serve(listener, State::new(config), shutdown_signal())
         .await
         .map_err(|e| e.to_string())?;
     log("INFO", "lake-polars stopped serving", json!({}));

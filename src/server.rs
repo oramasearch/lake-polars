@@ -5,6 +5,7 @@
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -39,6 +40,13 @@ pub const DEFAULT_QUERY_TIMEOUT: Duration = Duration::from_secs(30);
 pub const DEFAULT_MAX_CONCURRENT: usize = 2;
 /// How long an upload may take to arrive once it holds its permit, before `408 timeout`.
 pub const DEFAULT_UPLOAD_TIMEOUT: Duration = Duration::from_secs(300);
+/// How long a client may take to send a request's headers before the connection is closed.
+pub const DEFAULT_HEADER_TIMEOUT: Duration = Duration::from_secs(30);
+/// How many connections are open at once; one more is closed as soon as it is accepted.
+pub const DEFAULT_MAX_CONNECTIONS: usize = 512;
+/// The stack each query and upload runs on. Planning a query recurses over its expression tree;
+/// the sandbox bounds that tree's size, and this leaves the recursion ample room.
+pub const WORK_STACK_BYTES: usize = 64 << 20;
 /// Under a memory limit, an upload may be at most this fraction of it: a parsed frame and the
 /// Parquet writer's buffers take several times the raw bytes.
 pub const UPLOAD_MEMORY_DIVISOR: u64 = 4;
@@ -59,6 +67,10 @@ pub struct Config {
     /// How long an upload body may take to arrive (it holds a permit while it does).
     pub upload_timeout: Duration,
     pub max_concurrent: usize,
+    /// How long a client may take to send a request's headers.
+    pub header_timeout: Duration,
+    /// How many connections may be open at once.
+    pub max_connections: usize,
     /// The container memory limit in bytes, when known (the memory guard).
     pub memory_limit: Option<u64>,
     pub log: LogSink,
@@ -75,12 +87,19 @@ impl Config {
             query_timeout: DEFAULT_QUERY_TIMEOUT,
             upload_timeout: DEFAULT_UPLOAD_TIMEOUT,
             max_concurrent: DEFAULT_MAX_CONCURRENT,
+            header_timeout: DEFAULT_HEADER_TIMEOUT,
+            max_connections: DEFAULT_MAX_CONNECTIONS,
             memory_limit: None,
             log: Arc::new(|_| {}),
         }
     }
 
     /// The largest upload accepted: the body cap, lowered to a quarter of the memory limit.
+    /// The most bytes an upload may decode to (its Parquet footer's figures), under a memory limit.
+    pub fn decoded_cap(&self) -> Option<u64> {
+        self.memory_limit.map(|limit| limit / 2)
+    }
+
     pub fn upload_cap(&self) -> usize {
         match self.memory_limit {
             Some(limit) => self
@@ -153,6 +172,9 @@ impl From<StoreError> for ApiError {
     fn from(e: StoreError) -> ApiError {
         match e {
             StoreError::BadData(m) => ApiError::new(StatusCode::BAD_REQUEST, "invalid_data", m),
+            StoreError::TooLarge(m) => {
+                ApiError::new(StatusCode::PAYLOAD_TOO_LARGE, "body_too_large", m)
+            }
             StoreError::NotFound => {
                 ApiError::new(StatusCode::NOT_FOUND, "not_found", "no such dataset")
             }
@@ -332,7 +354,7 @@ where
 {
     tokio::task::spawn_blocking(move || {
         let _permit = permit;
-        work()
+        stacker::grow(WORK_STACK_BYTES, work)
     })
     .await
     .map_err(|_| {
@@ -360,11 +382,16 @@ async fn health(AxumState(state): AxumState<State>) -> Result<Json<Value>, ApiEr
     Ok(Json(json!({"status": "ok"})))
 }
 
-/// The data directory can be listed, and a file created in it and removed.
+static PROBE_COUNTER: AtomicU64 = AtomicU64::new(0);
+
+/// The data directory can be listed, and an empty file created in it and removed. The file is
+/// empty so that a full volume still passes (a DELETE can then free space), and its name is unique
+/// so that concurrent probes do not race.
 pub fn probe(dir: &Path) -> std::io::Result<()> {
     std::fs::read_dir(dir)?;
-    let path = dir.join(".healthz-probe");
-    std::fs::write(&path, b"ok")?;
+    let n = PROBE_COUNTER.fetch_add(1, Ordering::Relaxed);
+    let path = dir.join(format!(".healthz-probe-{}-{n}", std::process::id()));
+    std::fs::File::create(&path)?;
     std::fs::remove_file(&path)
 }
 
@@ -444,9 +471,10 @@ async fn upload(
         ));
     }
     let dir = state.dir().to_path_buf();
+    let decoded_cap = state.0.config.decoded_cap();
     // No timeout once the body is in: an upload that answered 504 would still land a moment later.
     let (dataset, replaced) = run_with_permit(permit, move || {
-        Ok(datasets::store(&dir, &name, format, &body)?)
+        Ok(datasets::store(&dir, &name, format, &body, decoded_cap)?)
     })
     .await?;
     let status = if replaced {
@@ -499,7 +527,17 @@ async fn query(
     headers: HeaderMap,
     body: Body,
 ) -> Result<Json<QueryAnswer>, ApiError> {
-    let body = read_body(&headers, body, QUERY_BODY_BYTES).await?;
+    let timeout = state.0.config.query_timeout;
+    let started = Instant::now();
+    let body = tokio::time::timeout(timeout, read_body(&headers, body, QUERY_BODY_BYTES))
+        .await
+        .map_err(|_| {
+            ApiError::new(
+                StatusCode::REQUEST_TIMEOUT,
+                "timeout",
+                "the query body did not arrive within the time limit",
+            )
+        })??;
     let request: QueryRequest = serde_json::from_slice(&body).map_err(|e| {
         ApiError::new(
             StatusCode::BAD_REQUEST,
@@ -514,17 +552,18 @@ async fn query(
             "sql is required",
         ));
     }
-    match sandbox::check(&request.sql) {
-        Ok(()) => {}
-        Err(Refusal::Syntax(m)) => return Err(sql_error(m)),
-        Err(Refusal::Forbidden(m)) => {
-            return Err(ApiError::new(StatusCode::BAD_REQUEST, "forbidden_sql", m))
-        }
-    }
     let dir = state.dir().to_path_buf();
     let max_rows = state.0.config.max_rows;
-    let timeout = state.0.config.query_timeout;
-    let answer = run_blocking(&state, Some(timeout), move || {
+    let remaining = timeout.saturating_sub(started.elapsed());
+    // The sandbox runs on the work stack too: it walks the parsed query recursively.
+    let answer = run_blocking(&state, Some(remaining), move || {
+        match sandbox::check(&request.sql) {
+            Ok(()) => {}
+            Err(Refusal::Syntax(m)) => return Err(sql_error(m)),
+            Err(Refusal::Forbidden(m)) => {
+                return Err(ApiError::new(StatusCode::BAD_REQUEST, "forbidden_sql", m))
+            }
+        }
         let mut context = datasets::context(&dir)?;
         let plan = context.execute(&request.sql).map_err(sql_error)?;
         let frame = plan
@@ -544,4 +583,55 @@ async fn query(
     })
     .await?;
     Ok(Json(answer))
+}
+
+/// Serves `state` on `listener` until `shutdown` completes, then waits for open connections to
+/// finish their requests. Unlike `axum::serve`, a client must send its headers within
+/// `header_timeout`, and at most `max_connections` connections are open at once (one more is
+/// closed as soon as it is accepted), so slow or idle clients cannot pile up.
+pub async fn serve(
+    listener: tokio::net::TcpListener,
+    state: State,
+    shutdown: impl std::future::Future<Output = ()>,
+) -> std::io::Result<()> {
+    use hyper_util::rt::{TokioIo, TokioTimer};
+    use hyper_util::server::graceful::GracefulShutdown;
+    use hyper_util::service::TowerToHyperService;
+
+    let header_timeout = state.0.config.header_timeout;
+    let connections = Arc::new(Semaphore::new(state.0.config.max_connections.max(1)));
+    let app = router(state);
+    let graceful = GracefulShutdown::new();
+    tokio::pin!(shutdown);
+    loop {
+        let stream = tokio::select! {
+            accepted = listener.accept() => match accepted {
+                Ok((stream, _)) => stream,
+                // A transient accept failure (out of descriptors, a reset): pause, then go on.
+                Err(_) => {
+                    tokio::time::sleep(Duration::from_millis(50)).await;
+                    continue;
+                }
+            },
+            () = &mut shutdown => break,
+        };
+        let Ok(permit) = connections.clone().try_acquire_owned() else {
+            drop(stream);
+            continue;
+        };
+        let mut builder = hyper::server::conn::http1::Builder::new();
+        builder
+            .timer(TokioTimer::new())
+            .header_read_timeout(header_timeout);
+        let connection =
+            builder.serve_connection(TokioIo::new(stream), TowerToHyperService::new(app.clone()));
+        let connection = graceful.watch(connection);
+        tokio::spawn(async move {
+            let _permit = permit;
+            let _ = connection.await;
+        });
+    }
+    drop(listener);
+    graceful.shutdown().await;
+    Ok(())
 }
