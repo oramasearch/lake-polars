@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # lake-polars, powered by Polars: one Rust binary built against glibc on Debian 12 (bookworm), run
 # on distroless/cc-debian12 (glibc and libgcc, no shell, no package manager) as the numeric
 # nonroot user 65532. Both base images are digest-pinned; builder and runtime share Debian 12's

@@ -30,3 +30,9 @@ The whole API, configuration, limits, sandbox and errors: [`docs/api.md`](docs/a
 
 The image is `oramasearch/lake-polars` on Docker Hub. The operator side (StatefulSet, Service,
 credential) is orama-operator `internal/controller/lake_service_polars.go`.
+
+## License
+
+MIT, see [LICENSE](LICENSE). Third-party components and their licenses are in
+[THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES). Contributions are welcome under the
+[Contributor License Agreement](CLA.md); see [CONTRIBUTING.md](CONTRIBUTING.md).

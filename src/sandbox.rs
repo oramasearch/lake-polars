@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! Customer SQL is untrusted code. Polars SQL can read any file the process can read through its
 //! table functions (`read_csv('/etc/passwd')`, `read_parquet`, `read_json`, `read_ipc`), and its

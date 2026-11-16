@@ -1,5 +1,4 @@
-// Copyright 2026 OramaSearch.
-// Licensed under the Apache License, Version 2.0.
+// SPDX-License-Identifier: MIT
 
 //! lake-polars, powered by Polars: the web service behind lake's `polars` service kind.
 //!
