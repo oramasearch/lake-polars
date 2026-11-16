@@ -2,10 +2,10 @@
   "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:ac1770aa-d5d0-5557-878a-f430350b6497",
+  "serialNumber": "urn:uuid:9100ff69-9005-5e4c-b582-9ad4f31ae1bf",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-16T01:55:18Z",
+    "timestamp": "2026-11-16T04:48:21Z",
     "tools": {
       "components": [
         {
@@ -3374,19 +3374,6 @@
       ]
     },
     {
-      "bom-ref": "pkg:docker/gcr.io/distroless/cc-debian12@sha256%3A9dac0a79194e45a7da0158a9c6da57b217585af0786db3845d1f0ec1a0dd182f?package-id=Image-gcr.io-distroless-cc-debian12-9d56ccee667ae7dc&tag=nonroot",
-      "type": "library",
-      "name": "gcr.io/distroless/cc-debian12",
-      "version": "nonroot@sha256:9dac0a79194e45a7da0158a9c6da57b217585af0786db3845d1f0ec1a0dd182f",
-      "purl": "pkg:docker/gcr.io/distroless/cc-debian12@sha256%3A9dac0a79194e45a7da0158a9c6da57b217585af0786db3845d1f0ec1a0dd182f?tag=nonroot",
-      "properties": [
-        {
-          "name": "syft:package:type",
-          "value": "UnknownPackage"
-        }
-      ]
-    },
-    {
       "bom-ref": "pkg:cargo/generic-array@0.14.7?package-id=Package-rust-crate-generic-array-254fb996e43125f6",
       "type": "library",
       "name": "generic-array",
@@ -4843,7 +4830,7 @@
       ]
     },
     {
-      "bom-ref": "Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "bom-ref": "Package-rust-crate-lake-polars-db561ee5809ab64f",
       "type": "library",
       "name": "lake-polars",
       "version": "0.1.0",
@@ -4887,7 +4874,7 @@
       "bom-ref": "DocumentRoot",
       "type": "library",
       "name": "lake-polars",
-      "version": "e4348a76f0d3",
+      "version": "8f00f050896d",
       "licenses": [
         {
           "license": {
@@ -4937,6 +4924,52 @@
         {
           "name": "syft:cpe23",
           "value": "cpe:2.3:a:libm:libm:0.2.16:*:*:*:*:rust:*:*"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:cargo/libmimalloc-sys@0.1.49?package-id=Package-rust-crate-libmimalloc-sys-66fb323adb01a4ff",
+      "type": "library",
+      "name": "libmimalloc-sys",
+      "version": "0.1.49",
+      "cpe": "cpe:2.3:a:libmimalloc-sys_project:libmimalloc-sys:0.1.49:*:*:*:*:rust:*:*",
+      "purl": "pkg:cargo/libmimalloc-sys@0.1.49",
+      "properties": [
+        {
+          "name": "syft:package:language",
+          "value": "rust"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "rust-crate"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:libmimalloc-sys_project:libmimalloc_sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:libmimalloc-sys:libmimalloc-sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:libmimalloc-sys:libmimalloc_sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:libmimalloc_sys:libmimalloc-sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:libmimalloc_sys:libmimalloc_sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:libmimalloc:libmimalloc-sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:libmimalloc:libmimalloc_sys:0.1.49:*:*:*:*:rust:*:*"
         }
       ]
     },
@@ -5241,6 +5274,28 @@
         {
           "name": "syft:cpe23",
           "value": "cpe:2.3:a:memmap2:memmap2:0.9.11:*:*:*:*:rust:*:*"
+        }
+      ]
+    },
+    {
+      "bom-ref": "pkg:cargo/mimalloc@0.1.52?package-id=Package-rust-crate-mimalloc-730645868da01633",
+      "type": "library",
+      "name": "mimalloc",
+      "version": "0.1.52",
+      "cpe": "cpe:2.3:a:mimalloc_project:mimalloc:0.1.52:*:*:*:*:rust:*:*",
+      "purl": "pkg:cargo/mimalloc@0.1.52",
+      "properties": [
+        {
+          "name": "syft:package:language",
+          "value": "rust"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "rust-crate"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:mimalloc:mimalloc:0.1.52:*:*:*:*:rust:*:*"
         }
       ]
     },
@@ -8419,11 +8474,11 @@
       ]
     },
     {
-      "bom-ref": "pkg:docker/rust@sha256%3A6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1?package-id=Image-rust-c50f3d3a4e7f4dc3&tag=1.95-bookworm",
+      "bom-ref": "pkg:docker/rust@sha256%3A606fd313a0f49743ee2a7bd49a0914bab7deedb12791f3a846a34a4711db7ed2?package-id=Image-rust-373b2274eba701d0&tag=1.95-alpine",
       "type": "library",
       "name": "rust",
-      "version": "1.95-bookworm@sha256:6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1",
-      "purl": "pkg:docker/rust@sha256%3A6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1?tag=1.95-bookworm",
+      "version": "1.95-alpine@sha256:606fd313a0f49743ee2a7bd49a0914bab7deedb12791f3a846a34a4711db7ed2",
+      "purl": "pkg:docker/rust@sha256%3A606fd313a0f49743ee2a7bd49a0914bab7deedb12791f3a846a34a4711db7ed2?tag=1.95-alpine",
       "properties": [
         {
           "name": "syft:package:type",
@@ -13976,20 +14031,23 @@
     {
       "ref": "DocumentRoot",
       "dependsOn": [
-        "pkg:docker/gcr.io/distroless/cc-debian12@sha256%3A9dac0a79194e45a7da0158a9c6da57b217585af0786db3845d1f0ec1a0dd182f?package-id=Image-gcr.io-distroless-cc-debian12-9d56ccee667ae7dc&tag=nonroot",
-        "pkg:docker/rust@sha256%3A6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1?package-id=Image-rust-c50f3d3a4e7f4dc3&tag=1.95-bookworm"
+        "pkg:docker/rust@sha256%3A606fd313a0f49743ee2a7bd49a0914bab7deedb12791f3a846a34a4711db7ed2?package-id=Image-rust-373b2274eba701d0&tag=1.95-alpine"
       ]
     },
     {
-      "ref": "Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "ref": "Package-rust-crate-lake-polars-db561ee5809ab64f",
       "dependsOn": [
         "pkg:cargo/axum@0.8.9?package-id=Package-rust-crate-axum-351644aa59ba718d",
         "pkg:cargo/http-body-util@0.1.3?package-id=Package-rust-crate-http-body-util-7b630357fc97448c",
+        "pkg:cargo/hyper-util@0.1.21?package-id=Package-rust-crate-hyper-util-bf5bff45e2a0e1dc",
+        "pkg:cargo/hyper@1.11.1?package-id=Package-rust-crate-hyper-f6d759a33d00cc18",
+        "pkg:cargo/mimalloc@0.1.52?package-id=Package-rust-crate-mimalloc-730645868da01633",
         "pkg:cargo/polars@0.55.2?package-id=Package-rust-crate-polars-eb1017f762e8b19a",
         "pkg:cargo/serde@1.0.228?package-id=Package-rust-crate-serde-bc7b9aacea66060b",
         "pkg:cargo/serde_json@1.0.151?package-id=Package-rust-crate-serde-json-c54383968354958e",
         "pkg:cargo/sha2@0.10.9?package-id=Package-rust-crate-sha2-2073615b17472c0a",
         "pkg:cargo/sqlparser@0.62.0?package-id=Package-rust-crate-sqlparser-4b915aef4a141c4d",
+        "pkg:cargo/stacker@0.1.25?package-id=Package-rust-crate-stacker-2c92de235fb0de16",
         "pkg:cargo/subtle@2.6.1?package-id=Package-rust-crate-subtle-9f42a083086714af",
         "pkg:cargo/tempfile@3.27.0?package-id=Package-rust-crate-tempfile-c87e86f44d21f159",
         "pkg:cargo/tokio@1.53.1?package-id=Package-rust-crate-tokio-b767b6fc47cf658e",
@@ -14759,6 +14817,12 @@
       ]
     },
     {
+      "ref": "pkg:cargo/libmimalloc-sys@0.1.49?package-id=Package-rust-crate-libmimalloc-sys-66fb323adb01a4ff",
+      "dependsOn": [
+        "pkg:cargo/cc@1.5.1?package-id=Package-rust-crate-cc-5a3434c6e0407daf"
+      ]
+    },
+    {
       "ref": "pkg:cargo/lock_api@0.4.14?package-id=Package-rust-crate-lock-api-b6694e94aaf8cf51",
       "dependsOn": [
         "pkg:cargo/scopeguard@1.2.0?package-id=Package-rust-crate-scopeguard-69f6bd899f1ffe61"
@@ -14781,6 +14845,12 @@
       "ref": "pkg:cargo/memmap2@0.9.11?package-id=Package-rust-crate-memmap2-3cf14430213f4ca2",
       "dependsOn": [
         "pkg:cargo/libc@0.2.189?package-id=Package-rust-crate-libc-dff1107a7066865b"
+      ]
+    },
+    {
+      "ref": "pkg:cargo/mimalloc@0.1.52?package-id=Package-rust-crate-mimalloc-730645868da01633",
+      "dependsOn": [
+        "pkg:cargo/libmimalloc-sys@0.1.49?package-id=Package-rust-crate-libmimalloc-sys-66fb323adb01a4ff"
       ]
     },
     {

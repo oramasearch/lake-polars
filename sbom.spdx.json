@@ -2,17 +2,17 @@
   "spdxVersion": "SPDX-2.3",
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
-  "name": "lake-polars-e4348a76f0d3",
-  "documentNamespace": "https://github.com/oramasearch/lake-polars/sbom/e4348a76f0d3f2e01da029ec5acd031525f09b62",
+  "name": "lake-polars-8f00f050896d",
+  "documentNamespace": "https://github.com/oramasearch/lake-polars/sbom/8f00f050896dcda72cd9a25ec2f9cc0ed16904cd",
   "creationInfo": {
-    "created": "2026-11-16T01:55:18Z",
+    "created": "2026-11-16T04:48:21Z",
     "creators": [
       "Organization: OramaSearch, Inc.",
       "Tool: tools/sbom.py",
       "Tool: syft"
     ],
     "licenseListVersion": "3.29",
-    "comment": "Made from source commit e4348a76f0d3f2e01da029ec5acd031525f09b62 by tools/sbom.py."
+    "comment": "Made from source commit 8f00f050896dcda72cd9a25ec2f9cc0ed16904cd by tools/sbom.py."
   },
   "documentDescribes": [
     "SPDXRef-DocumentRoot"
@@ -4343,26 +4343,6 @@
       ]
     },
     {
-      "name": "gcr.io/distroless/cc-debian12",
-      "SPDXID": "SPDXRef-Image-gcr.io-distroless-cc-debian12-9d56ccee667ae7dc",
-      "versionInfo": "nonroot@sha256:9dac0a79194e45a7da0158a9c6da57b217585af0786db3845d1f0ec1a0dd182f",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "supplier": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "primaryPackagePurpose": "CONTAINER",
-      "comment": "Container base image (gcr.io/distroless/cc-debian12:nonroot@sha256:9dac0a79194e45a7da0158a9c6da57b217585af0786db3845d1f0ec1a0dd182f), FROM in Dockerfile. Its own packages are in the image SBOM of each release image.",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceType": "purl",
-          "referenceLocator": "pkg:docker/gcr.io/distroless/cc-debian12@sha256%3A9dac0a79194e45a7da0158a9c6da57b217585af0786db3845d1f0ec1a0dd182f?tag=nonroot"
-        }
-      ]
-    },
-    {
       "name": "generic-array",
       "SPDXID": "SPDXRef-Package-rust-crate-generic-array-254fb996e43125f6",
       "versionInfo": "0.14.7",
@@ -6247,7 +6227,7 @@
     },
     {
       "name": "lake-polars",
-      "SPDXID": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "SPDXID": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "versionInfo": "0.1.0",
       "supplier": "NOASSERTION",
       "downloadLocation": "NOASSERTION",
@@ -6302,7 +6282,7 @@
     {
       "name": "lake-polars",
       "SPDXID": "SPDXRef-DocumentRoot",
-      "versionInfo": "e4348a76f0d3",
+      "versionInfo": "8f00f050896d",
       "downloadLocation": "git+https://github.com/oramasearch/lake-polars.git",
       "homepage": "https://github.com/oramasearch/lake-polars",
       "filesAnalyzed": false,
@@ -6369,6 +6349,65 @@
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
           "referenceLocator": "pkg:cargo/libm@0.2.16"
+        }
+      ]
+    },
+    {
+      "name": "libmimalloc-sys",
+      "SPDXID": "SPDXRef-Package-rust-crate-libmimalloc-sys-66fb323adb01a4ff",
+      "versionInfo": "0.1.49",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "sourceInfo": "acquired package info from rust cargo manifest: /Cargo.lock",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libmimalloc-sys_project:libmimalloc-sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libmimalloc-sys_project:libmimalloc_sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libmimalloc-sys:libmimalloc-sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libmimalloc-sys:libmimalloc_sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libmimalloc_sys:libmimalloc-sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libmimalloc_sys:libmimalloc_sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libmimalloc:libmimalloc-sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:libmimalloc:libmimalloc_sys:0.1.49:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/libmimalloc-sys@0.1.49"
         }
       ]
     },
@@ -6764,6 +6803,35 @@
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
           "referenceLocator": "pkg:cargo/memmap2@0.9.11"
+        }
+      ]
+    },
+    {
+      "name": "mimalloc",
+      "SPDXID": "SPDXRef-Package-rust-crate-mimalloc-730645868da01633",
+      "versionInfo": "0.1.52",
+      "supplier": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "sourceInfo": "acquired package info from rust cargo manifest: /Cargo.lock",
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:mimalloc_project:mimalloc:0.1.52:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:mimalloc:mimalloc:0.1.52:*:*:*:*:rust:*:*"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/mimalloc@0.1.52"
         }
       ]
     },
@@ -10852,8 +10920,8 @@
     },
     {
       "name": "rust",
-      "SPDXID": "SPDXRef-Image-rust-c50f3d3a4e7f4dc3",
-      "versionInfo": "1.95-bookworm@sha256:6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1",
+      "SPDXID": "SPDXRef-Image-rust-373b2274eba701d0",
+      "versionInfo": "1.95-alpine@sha256:606fd313a0f49743ee2a7bd49a0914bab7deedb12791f3a846a34a4711db7ed2",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "supplier": "NOASSERTION",
@@ -10861,12 +10929,12 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "primaryPackagePurpose": "CONTAINER",
-      "comment": "Container base image (rust:1.95-bookworm@sha256:6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1), FROM in Dockerfile. Its own packages are in the image SBOM of each release image.",
+      "comment": "Container base image (rust:1.95-alpine@sha256:606fd313a0f49743ee2a7bd49a0914bab7deedb12791f3a846a34a4711db7ed2), FROM in Dockerfile. Its own packages are in the image SBOM of each release image.",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE-MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:docker/rust@sha256%3A6258907abe69656e41cd992e0b705cdcfabcbbe3db374f92ed2d47121282d4a1?tag=1.95-bookworm"
+          "referenceLocator": "pkg:docker/rust@sha256%3A606fd313a0f49743ee2a7bd49a0914bab7deedb12791f3a846a34a4711db7ed2?tag=1.95-alpine"
         }
       ]
     },
@@ -18007,12 +18075,7 @@
       "spdxElementId": "SPDXRef-DOCUMENT"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Image-gcr.io-distroless-cc-debian12-9d56ccee667ae7dc",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-DocumentRoot"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Image-rust-c50f3d3a4e7f4dc3",
+      "relatedSpdxElement": "SPDXRef-Image-rust-373b2274eba701d0",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-DocumentRoot"
     },
@@ -20267,62 +20330,82 @@
       "spdxElementId": "SPDXRef-Package-rust-crate-serde-json-c54383968354958e"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "CONTAINS",
       "spdxElementId": "SPDXRef-DocumentRoot"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-axum-351644aa59ba718d"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-http-body-util-7b630357fc97448c"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
+      "relationshipType": "DEPENDENCY_OF",
+      "spdxElementId": "SPDXRef-Package-rust-crate-hyper-f6d759a33d00cc18"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
+      "relationshipType": "DEPENDENCY_OF",
+      "spdxElementId": "SPDXRef-Package-rust-crate-hyper-util-bf5bff45e2a0e1dc"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
+      "relationshipType": "DEPENDENCY_OF",
+      "spdxElementId": "SPDXRef-Package-rust-crate-mimalloc-730645868da01633"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-polars-eb1017f762e8b19a"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-serde-bc7b9aacea66060b"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-serde-json-c54383968354958e"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-sha2-2073615b17472c0a"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-sqlparser-4b915aef4a141c4d"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
+      "relationshipType": "DEPENDENCY_OF",
+      "spdxElementId": "SPDXRef-Package-rust-crate-stacker-2c92de235fb0de16"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-subtle-9f42a083086714af"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-tempfile-c87e86f44d21f159"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-tokio-b767b6fc47cf658e"
     },
     {
-      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-b0cb0a33e3c38c73",
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-lake-polars-db561ee5809ab64f",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-tower-93880c47d4ad0db7"
     },
@@ -20335,6 +20418,16 @@
       "relatedSpdxElement": "SPDXRef-Package-rust-crate-libm-c096c53af83107fc",
       "relationshipType": "CONTAINS",
       "spdxElementId": "SPDXRef-DocumentRoot"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-libmimalloc-sys-66fb323adb01a4ff",
+      "relationshipType": "CONTAINS",
+      "spdxElementId": "SPDXRef-DocumentRoot"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-libmimalloc-sys-66fb323adb01a4ff",
+      "relationshipType": "DEPENDENCY_OF",
+      "spdxElementId": "SPDXRef-Package-rust-crate-cc-5a3434c6e0407daf"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-rust-crate-linux-raw-sys-7fa7c8e99aec83c7",
@@ -20410,6 +20503,16 @@
       "relatedSpdxElement": "SPDXRef-Package-rust-crate-memmap2-3cf14430213f4ca2",
       "relationshipType": "DEPENDENCY_OF",
       "spdxElementId": "SPDXRef-Package-rust-crate-libc-dff1107a7066865b"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-mimalloc-730645868da01633",
+      "relationshipType": "CONTAINS",
+      "spdxElementId": "SPDXRef-DocumentRoot"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Package-rust-crate-mimalloc-730645868da01633",
+      "relationshipType": "DEPENDENCY_OF",
+      "spdxElementId": "SPDXRef-Package-rust-crate-libmimalloc-sys-66fb323adb01a4ff"
     },
     {
       "relatedSpdxElement": "SPDXRef-Package-rust-crate-mime-c6438f75cc24130e",
